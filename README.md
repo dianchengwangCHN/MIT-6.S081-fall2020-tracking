@@ -1,9 +1,11 @@
 # xv6-tracking
 Repository to record the progress for self-learning MIT 6.S081. Out of the respect to MIT for making all the great course resource public, the code implementation will only be kept in a separate private repository.
-- [Utilities Lab](#utilities-lab)
+- [Util Lab](#util-lab)
+    - [Lab Result](#lab-result)
+- [Syscall Lab](#syscall-lab)
     - [Lab Result](#lab-result)
 
-## Utilities Lab
+## Util Lab
 This lab requires to write some basic user space functions utilizing some library functions and system call functions.
 
 Most of the problems in this lab are not very hard to implement. The most interesting one is the `primes.c` program. The tricky part is every process will have two pipes to communicate with (one to communicate with its parent, one to communicate with its child), so how to use the `fork` and `pipe` to create the process? The way I approach this problem is:
@@ -43,4 +45,28 @@ xargs: OK (2.2s)
 == Test time ==
 time: OK
 Score: 100/100
+```
+
+## Syscall Lab
+
+### Lab Result
+```
+== Test trace 32 grep ==
+$ make qemu-gdb
+trace 32 grep: OK (4.8s)
+== Test trace all grep ==
+$ make qemu-gdb
+trace all grep: OK (1.7s)
+== Test trace nothing ==
+$ make qemu-gdb
+trace nothing: OK (1.0s)
+== Test trace children ==
+$ make qemu-gdb
+trace children: OK (11.5s)
+== Test sysinfotest ==
+$ make qemu-gdb
+sysinfotest: OK (2.1s)
+== Test time ==
+time: OK
+Score: 35/35
 ```
