@@ -6,6 +6,8 @@ Repository to record the progress for self-learning MIT 6.S081. Out of the respe
     - [Lab Result](#lab-result-2)
 - [Page Table Lab](#page-table-lab)
     - [Lab Result](#lab-result-3)
+- [Trap Lab](#trap-lab)
+    - [Lab Result](#lab-result-4)
 
 ## Util Lab
 This lab requires to write some basic user space functions utilizing some library functions and system call functions.
@@ -110,3 +112,32 @@ time: OK
 Score: 66/66
 ```
 
+
+## Trap Lab
+Overall for this lab, it is harder to understand how trap works than to implement lab solution.
+
+The high level workflow of trap is:
+- Some syscall is issued from user space and it triggers `ecall`.
+- program will be redirected to address in `stvec`, which is `trampoline`.
+- `uservec` in `trampoline` will save the registers' state and swap the user page table with kernel page table. Note here since `trampoline` and `trapframe` apply the same mapping in kernel page table and user page table, so page table swap won't affect the program execution. Then it will redirect program to `usertrap`.
+- `usertrap` will handle the trap according to certain logic. Then it will set some states in trapframe and some system hardware, including `sepc`, which is the program counter that user space program will start to run after the trap. After setting these states, `usertrap` will jump to `userret`, which will restore the registers' state stored in previous `uservec`. Then program will return to user space.
+
+The problems in the lab are not hard to implement. `backtrace` is simply tracking the frame pointer and print the return address all the way to top of the page of the kernel stack. `alarm` basically needs to set the `epc` in `usertrap` and store the user registers' state when timer interrupt occurred, so it can restore the state when `sys_sigreturn` is triggered.
+
+### Lab Result
+```sh
+== Test answers-traps.txt == answers-traps.txt: OK
+== Test backtrace test == backtrace test: OK (5.4s)
+== Test running alarmtest == (4.0s)
+== Test   alarmtest: test0 ==
+  alarmtest: test0: OK
+== Test   alarmtest: test1 ==
+  alarmtest: test1: OK
+== Test   alarmtest: test2 ==
+  alarmtest: test2: OK
+== Test usertests == usertests: OK (283.4s)
+    (Old xv6.out.usertests failure log removed)
+== Test time ==
+time: OK
+Score: 85/85
+```
