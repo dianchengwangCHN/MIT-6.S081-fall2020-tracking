@@ -3,11 +3,11 @@ Repository to record the progress for self-learning MIT 6.S081. Out of the respe
 - [Util Lab](#util-lab)
     - [Lab Result](#lab-result)
 - [Syscall Lab](#syscall-lab)
-    - [Lab Result](#lab-result-2)
+    - [Lab Result](#lab-result-1)
 - [Page Table Lab](#page-table-lab)
-    - [Lab Result](#lab-result-3)
+    - [Lab Result](#lab-result-2)
 - [Trap Lab](#trap-lab)
-    - [Lab Result](#lab-result-4)
+    - [Lab Result](#lab-result-3)
 
 ## Util Lab
 This lab requires to write some basic user space functions utilizing some library functions and system call functions.
