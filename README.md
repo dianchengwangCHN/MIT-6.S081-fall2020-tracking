@@ -8,6 +8,8 @@ Repository to record the progress for self-learning MIT 6.S081. Out of the respe
     - [Lab Result](#lab-result-2)
 - [Trap Lab](#trap-lab)
     - [Lab Result](#lab-result-3)
+- [Lazy Lab](#lazy-lab)
+    - [Lab Result](#lab-result-4)
 
 ## Util Lab
 This lab requires to write some basic user space functions utilizing some library functions and system call functions.
@@ -81,7 +83,7 @@ This is the first lab involving much kernel programming. To get the kernel page 
 **A few things to note:**
 - kernel page table and user page table are completely separate. `walk` is the bridge to get kernel space and user space work together. Before adding virtual address of user space to kernel page table, kernel mode and user mode are essentially using physical address to communicate.
 - I eventually followed the approach from the lab Q&A lecture to finish this lab. While to create a new kernel page for each process in `allocproc` is not impossible, the approach may cause some performance issue as you will need to free all the 3-level page tables when the process is done. I also tried to reuse everything in global kernel page table except allocating each kernel stack dynamically, but I was not able to get this working.
-- In the third problem, I was also think about to add user virtual address mappings only to the level 2 kernel page table such that level 1 and level 0 user page table can be reused. However, the problem here is kernel cannot access PTE with `PTE_U` flag, so I eventually gave up this approach.
+- In the third problem, I was also thinking about to add user virtual address mappings only to the level 2 kernel page table such that level 1 and level 0 user page table can be reused. However, the problem here is kernel cannot access PTE with `PTE_U` flag, so I eventually gave up this approach.
 
 ### Lab Result
 ```sh
@@ -141,3 +143,130 @@ The problems in the lab are not hard to implement. `backtrace` is simply trackin
 time: OK
 Score: 85/85
 ```
+
+## Lazy Lab
+Lazy Lab is mostly straightforward except the `sbrkarg` test is tricky. Recall from the page table lab, user page table does not overlap with kernel page table except `trampoline` and `trapframe`. The way `write` works is that kernel first follows the user page table to copy the user input to the kernel space and then performs the write, so `walkaddr` is actually where kernel can know a page is not allocated.
+
+### Lab Result
+```sh
+== Test running lazytests == (4.8s) 
+== Test   lazy: map == 
+  lazy: map: OK 
+== Test   lazy: unmap == 
+  lazy: unmap: OK 
+== Test usertests == (253.8s) 
+== Test   usertests: pgbug == 
+  usertests: pgbug: OK 
+== Test   usertests: sbrkbugs == 
+  usertests: sbrkbugs: OK 
+== Test   usertests: argptest == 
+  usertests: argptest: OK 
+== Test   usertests: sbrkmuch == 
+  usertests: sbrkmuch: OK 
+== Test   usertests: sbrkfail == 
+  usertests: sbrkfail: OK 
+== Test   usertests: sbrkarg == 
+  usertests: sbrkarg: OK 
+== Test   usertests: stacktest == 
+  usertests: stacktest: OK 
+== Test   usertests: execout == 
+  usertests: execout: OK 
+== Test   usertests: copyin == 
+  usertests: copyin: OK 
+== Test   usertests: copyout == 
+  usertests: copyout: OK 
+== Test   usertests: copyinstr1 == 
+  usertests: copyinstr1: OK 
+== Test   usertests: copyinstr2 == 
+  usertests: copyinstr2: OK 
+== Test   usertests: copyinstr3 == 
+  usertests: copyinstr3: OK 
+== Test   usertests: rwsbrk == 
+  usertests: rwsbrk: OK 
+== Test   usertests: truncate1 == 
+  usertests: truncate1: OK 
+== Test   usertests: truncate2 == 
+  usertests: truncate2: OK 
+== Test   usertests: truncate3 == 
+  usertests: truncate3: OK 
+== Test   usertests: reparent2 == 
+  usertests: reparent2: OK 
+== Test   usertests: badarg == 
+  usertests: badarg: OK 
+== Test   usertests: reparent == 
+  usertests: reparent: OK 
+== Test   usertests: twochildren == 
+  usertests: twochildren: OK 
+== Test   usertests: forkfork == 
+  usertests: forkfork: OK 
+== Test   usertests: forkforkfork == 
+  usertests: forkforkfork: OK 
+== Test   usertests: createdelete == 
+  usertests: createdelete: OK 
+== Test   usertests: linkunlink == 
+  usertests: linkunlink: OK 
+== Test   usertests: linktest == 
+  usertests: linktest: OK 
+== Test   usertests: unlinkread == 
+  usertests: unlinkread: OK 
+== Test   usertests: concreate == 
+  usertests: concreate: OK 
+== Test   usertests: subdir == 
+  usertests: subdir: OK 
+== Test   usertests: fourfiles == 
+  usertests: fourfiles: OK 
+== Test   usertests: sharedfd == 
+  usertests: sharedfd: OK 
+== Test   usertests: exectest == 
+  usertests: exectest: OK 
+== Test   usertests: bigargtest == 
+  usertests: bigargtest: OK 
+== Test   usertests: bigwrite == 
+  usertests: bigwrite: OK 
+== Test   usertests: bsstest == 
+  usertests: bsstest: OK 
+== Test   usertests: sbrkbasic == 
+  usertests: sbrkbasic: OK 
+== Test   usertests: kernmem == 
+  usertests: kernmem: OK 
+== Test   usertests: validatetest == 
+  usertests: validatetest: OK 
+== Test   usertests: opentest == 
+  usertests: opentest: OK 
+== Test   usertests: writetest == 
+  usertests: writetest: OK 
+== Test   usertests: writebig == 
+  usertests: writebig: OK 
+== Test   usertests: createtest == 
+  usertests: createtest: OK 
+== Test   usertests: openiput == 
+  usertests: openiput: OK 
+== Test   usertests: exitiput == 
+  usertests: exitiput: OK 
+== Test   usertests: iput == 
+  usertests: iput: OK 
+== Test   usertests: mem == 
+  usertests: mem: OK 
+== Test   usertests: pipe1 == 
+  usertests: pipe1: OK 
+== Test   usertests: preempt == 
+  usertests: preempt: OK 
+== Test   usertests: exitwait == 
+  usertests: exitwait: OK 
+== Test   usertests: rmdot == 
+  usertests: rmdot: OK 
+== Test   usertests: fourteen == 
+  usertests: fourteen: OK 
+== Test   usertests: bigfile == 
+  usertests: bigfile: OK 
+== Test   usertests: dirfile == 
+  usertests: dirfile: OK 
+== Test   usertests: iref == 
+  usertests: iref: OK 
+== Test   usertests: forktest == 
+  usertests: forktest: OK 
+== Test time == 
+time: OK 
+Score: 119/119
+```
+
