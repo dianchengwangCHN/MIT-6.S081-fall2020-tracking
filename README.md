@@ -10,6 +10,8 @@ Repository to record the progress for self-learning MIT 6.S081. Out of the respe
     - [Lab Result](#lab-result-3)
 - [Lazy Lab](#lazy-lab)
     - [Lab Result](#lab-result-4)
+- [Copy-on-Write Lab](#copy-on-write-lab)
+    - [Lab Result](#lab-result-5)
 
 ## Util Lab
 This lab requires to write some basic user space functions utilizing some library functions and system call functions.
@@ -270,3 +272,35 @@ time: OK
 Score: 119/119
 ```
 
+## Copy-on-Write Lab
+Copy on write is similar to lazy page allocation. A few key points:
+- When `fork` calls `uvmcopy`, let the child page table entry to be mapped to same physical address as its parent. The PTE should be set unwritable (with `PTE_W` as 0). For distinguish if a page is COW page, I also use the reserved flag bit 8 (`PTE_COW`) as an indicator. Keep track of the page reference to know when should the page be actually freed.
+- Change the `kfree` to first decrement the page reference count and then check if it needs to be freed.
+- Add trap handler to allocate a new page when the page fault if caused by COW. The new page should be given the write access (`PTE_W`) and clear the COW flag (`PTE_COW`). Depending on the implementation approach, the old page entry could be set to `PTE_W & ~PTE_COW` when it only has 1 reference, or it can be left as unchanged until the next page fault on it is triggered.
+- Similar to lazy page allocation lab. Because the way kernel and user space passing arguments to communicate, a potential page fault could be triggered when user performs a `read` since kernel needs to follow the user page table to find and write content to a physical address. Since the process is implemented by software, so page fault will not be triggered by hardware and it is required to be handled by our code. Different from the lazy allocation, this will only happen when user try to read but not on write.
+
+### Lab Result
+```sh
+== Test running cowtest == 
+$ make qemu-gdb
+(10.2s) 
+== Test   simple == 
+  simple: OK 
+== Test   three == 
+  three: OK 
+== Test   file == 
+  file: OK 
+== Test usertests == 
+$ make qemu-gdb
+(129.9s) 
+    (Old xv6.out.usertests failure log removed)
+== Test   usertests: copyin == 
+  usertests: copyin: OK 
+== Test   usertests: copyout == 
+  usertests: copyout: OK 
+== Test   usertests: all tests == 
+  usertests: all tests: OK 
+== Test time == 
+time: OK 
+Score: 110/110
+```
