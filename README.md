@@ -12,6 +12,8 @@ Repository to record the progress for self-learning MIT 6.S081. Out of the respe
     - [Lab Result](#lab-result-4)
 - [Copy-on-Write Lab](#copy-on-write-lab)
     - [Lab Result](#lab-result-5)
+- [Thread Lab](#thread-lab)
+    - [Lab Result](#lab-result-6)
 
 ## Util Lab
 This lab requires to write some basic user space functions utilizing some library functions and system call functions.
@@ -303,4 +305,24 @@ $ make qemu-gdb
 == Test time == 
 time: OK 
 Score: 110/110
+```
+
+## Thread Lab
+This lab is relatively easy. The user-level thread switching is quite similar to kernel thread switching. The only tricky part that worth noticing is thread stack grows from high address to low address, so be careful when set the stack pointer.
+
+### Lab Result
+```sh
+== Test uthread ==
+$ make qemu-gdb
+uthread: OK (4.1s)
+== Test answers-thread.txt == answers-thread.txt: OK
+== Test ph_safe == make[1]: `ph' is up to date.
+ph_safe: OK (8.3s)
+== Test ph_fast == make[1]: `ph' is up to date.
+ph_fast: OK (17.2s)
+== Test barrier == make[1]: `barrier' is up to date.
+barrier: OK (2.1s)
+== Test time ==
+time: OK
+Score: 60/60
 ```
