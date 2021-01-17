@@ -1,19 +1,23 @@
 # xv6-tracking
 Repository to record the progress for self-learning MIT 6.S081. Out of the respect to MIT for making all the great course resource public, the code implementation will only be kept in a separate private repository.
-- [Util Lab](#util-lab)
+- [x] [Util Lab](#util-lab)
     - [Lab Result](#lab-result)
-- [Syscall Lab](#syscall-lab)
+- [x] [Syscall Lab](#syscall-lab)
     - [Lab Result](#lab-result-1)
-- [Page Table Lab](#page-table-lab)
+- [x] [Page Table Lab](#page-table-lab)
     - [Lab Result](#lab-result-2)
-- [Trap Lab](#trap-lab)
+- [x] [Trap Lab](#trap-lab)
     - [Lab Result](#lab-result-3)
-- [Lazy Lab](#lazy-lab)
+- [x] [Lazy Lab](#lazy-lab)
     - [Lab Result](#lab-result-4)
-- [Copy-on-Write Lab](#copy-on-write-lab)
+- [x] [Copy-on-Write Lab](#copy-on-write-lab)
     - [Lab Result](#lab-result-5)
-- [Thread Lab](#thread-lab)
+- [x] [Thread Lab](#thread-lab)
     - [Lab Result](#lab-result-6)
+- [ ] [Lock Lab](#lock-lab)
+    - [Lab Result](#lab-result-7)
+- [x] [File System Lab](#file-system-lab)
+    - [Lab Result](#lab-result-8)
 
 ## Util Lab
 This lab requires to write some basic user space functions utilizing some library functions and system call functions.
@@ -325,4 +329,36 @@ barrier: OK (2.1s)
 == Test time ==
 time: OK
 Score: 60/60
+```
+
+## Lock Lab
+Buffer cache is still WIP.
+
+### Lab Result
+
+
+## File System Lab
+The main challenges in this lab is to figure out how some of the existing file system APIs work. The large files problem is straightforward. Basically except to change the layout of `inode` and `dinode`, it requires to add one level deep to the lookup operation (`bmap`) and delete operation (`itrunc`). The soft link lab is a bit harder IMO since the lecture does not cover too much detail about the symbolic link, and the lab instruction does not really tell you what the exact file system functions you should look at for this problem. The functions I used are:
+- `static struct inode* create(char *path, short type, short major, short minor)`
+- `int writei(struct inode*, int, uint64, uint, uint)`
+- `int readi(struct inode*, int, uint64, uint, uint)`
+
+###  Lab Result
+```sh
+== Test running bigfile == 
+$ make qemu-gdb
+running bigfile: OK (163.6s) 
+== Test running symlinktest == 
+$ make qemu-gdb
+(1.2s) 
+== Test   symlinktest: symlinks == 
+  symlinktest: symlinks: OK 
+== Test   symlinktest: concurrent symlinks == 
+  symlinktest: concurrent symlinks: OK 
+== Test usertests == 
+$ make qemu-gdb
+usertests: OK (281.1s) 
+== Test time == 
+time: OK 
+Score: 100/100
 ```
