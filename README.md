@@ -1,5 +1,6 @@
-# xv6-tracking
+# MIT 6.S081 Fall 2020 Self-study
 Repository to record the progress for self-learning MIT 6.S081. Out of the respect to MIT for making all the great course resource public, the code implementation will only be kept in a separate private repository.
+
 - [x] [Util Lab](#util-lab)
     - [Lab Result](#lab-result)
 - [x] [Syscall Lab](#syscall-lab)
@@ -18,6 +19,10 @@ Repository to record the progress for self-learning MIT 6.S081. Out of the respe
     - [Lab Result](#lab-result-7)
 - [x] [File System Lab](#file-system-lab)
     - [Lab Result](#lab-result-8)
+- [x] [Mmap Lab](#mmap-lab)
+    - [Lab Result](#lab-result-9)
+- [x] [Network Lab](#network-lab)
+    - [Lab Result](#lab-result-10)
 
 ## Util Lab
 This lab requires to write some basic user space functions utilizing some library functions and system call functions.
@@ -332,10 +337,38 @@ Score: 60/60
 ```
 
 ## Lock Lab
-Buffer cache is still WIP.
+The buffer cache lab have the similar functionality as the Buffer Pool in CMU 15-445 lab, so I decide to not implement this part for now.
 
 ### Lab Result
-
+```sh
+== Test   kalloctest: test1 == 
+  kalloctest: test1: OK 
+== Test   kalloctest: test2 == 
+  kalloctest: test2: OK 
+== Test kalloctest: sbrkmuch == 
+$ make qemu-gdb
+kalloctest: sbrkmuch: OK (19.9s) 
+== Test running bcachetest == 
+$ make qemu-gdb
+(20.7s) 
+== Test   bcachetest: test0 == 
+  bcachetest: test0: FAIL 
+    ...
+         tot= 165795
+         test0: FAIL
+         start test1
+         test1 OK
+         $ qemu-system-riscv64: terminating on signal 15 from pid 46787 (<unknown process>)
+    MISSING '^test0: OK$'
+== Test   bcachetest: test1 == 
+  bcachetest: test1: OK 
+== Test usertests == 
+$ make qemu-gdb
+usertests: OK (237.2s) 
+== Test time == 
+time: OK 
+Score: 60/70
+```
 
 ## File System Lab
 The main challenges in this lab is to figure out how some of the existing file system APIs work. The large files problem is straightforward. Basically except to change the layout of `inode` and `dinode`, it requires to add one level deep to the lookup operation (`bmap`) and delete operation (`itrunc`). The soft link lab is a bit harder IMO since the lecture does not cover too much detail about the symbolic link, and the lab instruction does not really tell you what the exact file system functions you should look at for this problem. The functions I used are:
@@ -358,6 +391,73 @@ $ make qemu-gdb
 == Test usertests == 
 $ make qemu-gdb
 usertests: OK (281.1s) 
+== Test time == 
+time: OK 
+Score: 100/100
+```
+
+## Mmap Lab
+The most difficult part of this lab is there is not build-in memory management mechanism for virtual address, so when `mmap` and `munmap` is called, we have to figure out the address we want to map to the file and when later a page fault is triggered we should be able to figure out which VMA this fault address corresponds to. The lab instruction recommends to have a array-like preserved virtual address as VMA. Based on my understanding, this implies the constraint that `munmap` will not create the "hole" in a VMA. So based on this, the `mmap` and `munmap` flow would be:
+#### VMA struct definition:
+```c
+struct vma_t {
+  uint64 start;
+  uint64 end;
+  int prot;
+  int flags;
+  int offset;
+  int used;
+  struct file *file;
+};
+```
+
+#### `mmap`:
+- Check if arguments is valid.
+- Find one VMA and set fields based on given arguments.
+- When page fault is triggered, we should allocate a new physical page, read the corresponding file content to the page, and then map the corresponding virtual address to the physical address.
+
+#### `munmap`:
+- Since we assume the `munmap` will not create "hole", this will make the lab way more easier, which only requires us to shrink the start and end of VMA, and decrease the file reference count when the entire VMA is unmapped (start will be equal to end then).
+- Free the corresponding physical page.
+
+### Lab Result
+```sh
+== Test   mmaptest: mmap f == 
+  mmaptest: mmap f: OK 
+== Test   mmaptest: mmap private == 
+  mmaptest: mmap private: OK 
+== Test   mmaptest: mmap read-only == 
+  mmaptest: mmap read-only: OK 
+== Test   mmaptest: mmap read/write == 
+  mmaptest: mmap read/write: OK 
+== Test   mmaptest: mmap dirty == 
+  mmaptest: mmap dirty: OK 
+== Test   mmaptest: not-mapped unmap == 
+  mmaptest: not-mapped unmap: OK 
+== Test   mmaptest: two files == 
+  mmaptest: two files: OK 
+== Test   mmaptest: fork_test == 
+  mmaptest: fork_test: OK 
+== Test usertests == 
+$ make qemu-gdb
+usertests: OK (182.8s) 
+== Test time == 
+time: OK 
+Score: 140/140
+```
+
+## Network Lab
+
+### Lab Result
+```sh
+== Test   nettest: ping == 
+  nettest: ping: OK 
+== Test   nettest: single process == 
+  nettest: single process: OK 
+== Test   nettest: multi-process == 
+  nettest: multi-process: OK 
+== Test   nettest: DNS == 
+  nettest: DNS: OK 
 == Test time == 
 time: OK 
 Score: 100/100
